@@ -15,21 +15,17 @@ extern char* _hrd_cache_dir; /* cache/cache.c */
 
 void* hrd_cache_edit_data(char* filename, size_t size){
 	if (_hrd_cache_dir == NULL){
-		(void)fputs("hrd: Attempted to edit cached data with unsetted cache_dir\n", stderr);
 		errno = ENOENT;
 		return NULL;
 	} 
 	if (filename == NULL){
-		(void)fputs("hrd: Attempted to edit cached data without filenamei\n", stderr);
 		errno = EINVAL;
 		return NULL;
 	}
-	if (!hrd_file_exist(filename, HRDFS_ISFILE | HRDFS_READBL | HRDFS_WRITBL)){
-		(void)fputs("hrd: Attempted to edit cached data from directory/file without read-write permissions/missing file\n", stderr);
-		errno = EACCES;
-		return NULL;
-	}
 	int file = open(filename, O_RDWR);
+	
+	if (file == -1) return NULL;
+
 	void* buffer = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
 	(void)close(file);
 	return buffer;

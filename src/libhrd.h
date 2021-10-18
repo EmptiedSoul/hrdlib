@@ -1,6 +1,9 @@
 #ifndef LIBHRD_H
 #define LIBHRD_H
 
+#include <stdbool.h>
+#include <stdio.h>
+
 /* fs */
 enum {
 	HRDFS_ISDIR 	= 1,							/* is a directory			*/
@@ -22,7 +25,8 @@ extern int hrd_cache_edit_end(void* addr, size_t size);				/* End editing cached
 
 
 /* config */
-extern char* hrd_cfg_get_string(char* filename, char* key);			/* Get value for key in cfg file	*/
+extern char* hrd_cfg_get_string_at(char* filename, char* key);
+extern char* hrd_cfg_get_string(FILE* config, char* key);			/* Get value for key in cfg file	*/
 
 
 

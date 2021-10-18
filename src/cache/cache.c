@@ -25,17 +25,14 @@ int hrd_cache_set_dir(char* dir){
 
 int hrd_cache_data(char* filename, void* data, size_t size){
 	if (_hrd_cache_dir == NULL){
-		(void)fputs("hrd: Attempted to cache data with unsetted cache_dir\n", stderr);
 		errno = ENOENT;
 		return -1;
 	} 
 	if (filename == NULL){
-		(void)fputs("hrd: Attempted to cache data without filename\n", stderr);
 		errno = EINVAL;
 		return -1;
 	}
 	if (size <= 0){
-		(void)fputs("hrd: Attempted to cache data with size less than 1 byte\n", stderr);
 		errno = EINVAL;
 		return -1;
 	}

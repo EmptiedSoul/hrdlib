@@ -11,23 +11,22 @@
 
 #include "../libhrd.h"
 
-char* hrd_cfg_get_string(char* filename, char* key){
-	if (!hrd_file_exist(filename, HRDFS_ISFILE|HRDFS_READBL )) {
-		fputs("hrd: Attempted to read string from non-existent file\n", stderr);
-		errno = ENOENT;
-		return NULL;
-	}
+char* hrd_cfg_get_string_at(char* filename, char* key){
+	FILE* config = fopen(filename, "r");
+	if (!config) return NULL;
+	char* result = hrd_cfg_get_string(config, key);
+	fclose(config);
+	return result;
+}
 
+char* hrd_cfg_get_string(FILE* config, char* key){
 	char* cfg_key = NULL;
 	char* value = NULL;
-
-	FILE* config = fopen(filename, "r");
 	while (!feof(config)){
 		int readsyms = fscanf(config, "%m[^=]=%m[^\n]\n", &cfg_key, &value);	
 		switch (readsyms){
 			case EOF:
 				perror("hrd: cfg: get_string: fscanf");
-				fclose(config);
 				return NULL;
 				break;
 			case 0:
@@ -39,14 +38,12 @@ char* hrd_cfg_get_string(char* filename, char* key){
 					if (first == '#') break;
 				}
 				if (value != NULL)	free(value);
-				fclose(config);
 				errno = EINVAL;
 				return NULL;
 				break;
 			case 2: 
 				if (strcmp(cfg_key, key) == 0){
 					free(cfg_key);
-					fclose(config);
 					return value;
 				}else{
 					free(cfg_key);
@@ -57,7 +54,6 @@ char* hrd_cfg_get_string(char* filename, char* key){
 				break;
 		}
 	}
-	fclose(config);
 	errno = ENOKEY;
 	return NULL;
 }

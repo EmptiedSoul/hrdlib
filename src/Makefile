@@ -1,12 +1,12 @@
 CC = gcc
 DESTDIR=
 ADDFLAGS =
-CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto -fuse-linker-plugin -fuse-ld=gold -fPIC
+CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto -fuse-linker-plugin -fuse-ld=gold -fPIC -floop-block -floop-interchange -ftree-loop-distribution -floop-strip-mine 
 export CFLAGS
 DBGFLAGS = 
 export DBGFLAGS
 WARNFLAGS = -Wall -pedantic -Wextra -Wshadow -Werror
-LDFLAGS = -Wl,-O1  -lrt 
+LDFLAGS = -Wl,-O1  
 
 MAKEFLAGS += --no-print-directory
 
@@ -38,3 +38,4 @@ install: all
 	@install -vm755 ./libhrd.so ${DESTDIR}/usr/lib
 	@install -vm644 ./libhrd.h  ${DESTDIR}/usr/include
 	@install -vm644 ./libhrd_pseudonames.h ${DESTDIR}/usr/include
+	@install -vm644 ./libhrd.pc ${DESTDIR}/usr/lib/pkgconfig/libhrd.pc
