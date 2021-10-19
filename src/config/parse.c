@@ -27,6 +27,7 @@ char* hrd_cfg_get_string(FILE* config, char* key){
 		switch (readsyms){
 			case EOF:
 				perror("hrd: cfg: get_string: fscanf");
+				rewind(config);
 				return NULL;
 				break;
 			case 0:
@@ -39,11 +40,13 @@ char* hrd_cfg_get_string(FILE* config, char* key){
 				}
 				if (value != NULL)	free(value);
 				errno = EINVAL;
+				rewind(config);
 				return NULL;
 				break;
 			case 2: 
 				if (strcmp(cfg_key, key) == 0){
 					free(cfg_key);
+					rewind(config);
 					return value;
 				}else{
 					free(cfg_key);
@@ -54,6 +57,7 @@ char* hrd_cfg_get_string(FILE* config, char* key){
 				break;
 		}
 	}
+	rewind(config);
 	errno = ENOKEY;
 	return NULL;
 }
