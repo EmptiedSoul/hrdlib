@@ -4,6 +4,12 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+/* data types */
+typedef struct {
+	char* key;
+	char* value;
+} hrd_string_pair;
+
 /* fs */
 enum {
 	HRDFS_ISDIR 	= 1,							/* is a directory			*/
@@ -26,14 +32,24 @@ extern int hrd_cache_edit_end(void* addr, size_t size);				/* End editing cached
 
 /* config */
 extern char* hrd_cfg_get_string_at(char* filename, char* key);
-extern char* hrd_cfg_get_string(FILE* config, char* key);			/* Get value for key in cfg file	*/
+extern char* hrd_cfg_get_string(FILE* stream, char* key);			/* Get value for key in cfg file	*/
+extern int   hrd_cfg_get_strings_at(char* filename, hrd_string_pair* keys[]);
+extern int   hrd_cfg_get_strings(FILE* stream, hrd_string_pair* keys[]);	/* Get values for key arra in cfg file  */
 
 
 
 /* strings */
 extern size_t hrd_string_discard_chars(char* string, char to_discard);		/* discard chars from string		*/
 extern char** hrd_string_split(char* string, char* delimiters);			/* split string				*/
-extern void   hrd_array_free(void** array);					/* free array (splitted string)		*/
+extern void   hrd_string_array_free(void** array);				/* free string array (splitted string)	*/
+#define hrd_array_free(x) hrd_string_array_free(x);
+extern void   hrd_string_pair_array_free(hrd_string_pair* array);		/* free string pair array		*/
+extern void   hrd_string_pair_array_free_stackkeys(hrd_string_pair* array);
+extern void   hrd_string_pair_array_free_keysonly(hrd_string_pair* array);
+#define hrd_string_array_foreach(__hrd_iter, x) \
+	for (int __hrd_iter = 0; x[__hrd_iter]; __hrd_iter++)				/* iterate thru string array		*/
+#define hrd_string_pair_array_foreach(iter, x) \
+	for (int iter = 0; (x)[iter].key; iter++)					/* iterate thru string pair array	*/
 extern void   hrd_trim_spaces(char* string);					/* trim leading and trailing spaces	*/
 
 #endif

@@ -3,14 +3,14 @@ DESTDIR=
 ADDFLAGS =
 CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto -fuse-linker-plugin -fuse-ld=gold -fPIC -floop-block -floop-interchange -ftree-loop-distribution -floop-strip-mine 
 export CFLAGS
-DBGFLAGS = 
+DBGFLAGS = -g3 -ggdb3
 export DBGFLAGS
 WARNFLAGS = -Wall -pedantic -Wextra -Wshadow -Werror
 LDFLAGS = -Wl,-O1  
 
 MAKEFLAGS += --no-print-directory
 
-FLAGS := ${CFLAGS} ${DGBFLAGS} ${WARNFLAGS} ${ADDFLAGS} 
+FLAGS := ${CFLAGS} ${DBGFLAGS} ${WARNFLAGS} ${ADDFLAGS} 
 
 objects = $(patsubst %.c,%.o,$(wildcard */*.c))
 

@@ -7,7 +7,7 @@ LDFLAGS = -Wl,-O1  -lrt
 
 MAKEFLAGS += --no-print-directory
 
-FLAGS := ${CFLAGS} ${DGBFLAGS} ${WARNFLAGS} ${ADDFLAGS} 
+FLAGS := ${CFLAGS} ${DBGFLAGS} ${WARNFLAGS} ${ADDFLAGS} 
 
 objects = $(patsubst %.c,%.o,$(wildcard *.c))
 
