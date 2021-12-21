@@ -15,14 +15,18 @@ char* hrd_cfg_get_string_at(char* filename, char* key){
 	FILE* stream = fopen(filename, "r");
 	if (!stream)
 		return NULL;
-	return hrd_cfg_get_string(stream, key);
+	char* res = hrd_cfg_get_string(stream, key);
+	fclose(stream);
+	return res;
 }
 
 int hrd_cfg_get_strings_at(char* filename, hrd_string_pair* keys[]){
 	FILE* stream = fopen(filename, "r");
 	if (!stream)
 		return -1;
-	return hrd_cfg_get_strings(stream, keys);
+	int res = hrd_cfg_get_strings(stream, keys);
+	fclose(stream);
+	return res;
 }
 
 char* hrd_cfg_get_string(FILE* stream, char* key){

@@ -35,7 +35,7 @@ void hrd_string_pair_array_free_stackkeys(hrd_string_pair* array) {
 	free(array);
 }
 
-void hrd_string_pair_free_keysonly(hrd_string_pair* array) {
+void hrd_string_pair_array_free_keysonly(hrd_string_pair* array) {
 	hrd_string_pair_array_foreach (i, array) {
 		if (array[i].value)
 			free(array[i].value);
