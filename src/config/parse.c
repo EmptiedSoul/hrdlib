@@ -11,71 +11,88 @@
 
 #include "../libhrd.h"
 
-char* hrd_cfg_get_string_at(char* filename, char* key){
-	FILE* stream = fopen(filename, "r");
-	if (!stream)
-		return NULL;
-	char* res = hrd_cfg_get_string(stream, key);
-	fclose(stream);
-	return res;
+/* Parser for INI- and Bash-like configuration files */
+
+char* hrd_cfg_get_string(hrd_config* cfg, char* section, char* key){
+	if (section) {
+		hrd_hashmap* map = hrd_hashmap_get_value(cfg->sections, section);
+		if (section)
+			return hrd_hashmap_get_value(map, key);
+	} else {
+		return hrd_hashmap_get_value(cfg->global_keys, key);
+	}
+	return NULL;
 }
 
-int hrd_cfg_get_strings_at(char* filename, hrd_string_pair* keys[]){
-	FILE* stream = fopen(filename, "r");
-	if (!stream)
-		return -1;
-	int res = hrd_cfg_get_strings(stream, keys);
-	fclose(stream);
-	return res;
-}
-
-char* hrd_cfg_get_string(FILE* stream, char* key){
-	hrd_string_pair* keys = alloca(sizeof(hrd_string_pair) * 2);
-	hrd_string_pair  key_arg = {key, 0};
-	hrd_string_pair  terminator = {0,0};
-	keys[0] = key_arg;
-	keys[1] = terminator;
-	int retval = hrd_cfg_get_strings(stream, &keys);
-	if (retval < 0)
-		return NULL;
-	return keys[0].value;
-}
-
-int hrd_cfg_get_strings(FILE* stream, hrd_string_pair* keys[]){
+hrd_config* hrd_cfg_read(FILE* stream) {
 	char*	line		= NULL;
 	size_t	buflen		= 0;
 	ssize_t	nread		= 0;
-	int 	values_found	= 0;
-	bool	read_failed 	= true;
+	char* current_section   = NULL;
+
+	hrd_config*  cfg = malloc(sizeof(hrd_config));
+	cfg->global_keys = hrd_hashmap_create(0);
+	cfg->sections = hrd_hashmap_create(20); 
+	/* 20 sections should be enough for average INI file 
+	 * Passing 0 will lead to memory overuse */
 
 	while ((nread = getline(&line, &buflen, stream)) != -1) {
-		read_failed = false;
-		if (*line == '#')
+		if (*line == '#' || *line == ';' || *line == '\n') /* Comment */
 			continue;
+		if (*line == '[') { /* INI Section header */
+			char* section = line + 1;
+			section[strlen(section) - 2] = '\0';
+			if (current_section) 
+				free(current_section);
+			current_section = strdup(section);
+			hrd_hashmap_set_value(cfg->sections, section, hrd_hashmap_create(0));
+			continue;
+		}
 		char* equal_sign = strchr(line, '=');
 		if (!equal_sign) {
 			errno = EINVAL;
-			free(line);
-			return -1;
+			break;
 		}
 		char* value = equal_sign + 1;
 		char* value_newline = strrchr(value, '\n');
 		*value_newline = '\0';
 		*equal_sign = '\0';
 		char* key = line;
-		hrd_string_pair_array_foreach (i, *keys) {
-			if (strcmp((*keys)[i].key, key) == 0) {
-				(*keys)[i].value = strdup(value);
-				values_found++;
-			}
-		}
+		if (current_section)
+			hrd_hashmap_set_value(hrd_hashmap_get_value(cfg->sections, current_section), key, strdup(value));
+		else
+			hrd_hashmap_set_value(cfg->global_keys, key, strdup(value));
 	}
-	if (read_failed) {
-		errno = EBADF;
-		free(line);
-		return -1;
-	}
-
+	if (current_section)
+		free(current_section);
 	free(line);
-	return values_found;
+	return cfg;
+}
+
+hrd_config* hrd_cfg_read_at(char* filename) {
+	FILE* stream = fopen(filename, "r");
+	if (stream) {
+		hrd_config* res = hrd_cfg_read(stream);
+		fclose(stream);
+		return res;
+	} else 
+		return NULL;
+}
+
+char* hrd_cfg_get_string_at(char* filename, char* section, char* key){
+	hrd_config* cfg = hrd_cfg_read_at(filename);
+	if (cfg)
+		return hrd_cfg_get_string(cfg, section, key);
+	else
+		return NULL;
+}
+
+void hrd_cfg_free(hrd_config* cfg) {
+	hrd_hashmap_free(cfg->global_keys);
+	for (hrd_hashmap_slot* slot = cfg->sections->first; slot; slot = slot->next){
+		if (slot->value)
+			hrd_hashmap_free(slot->value);
+	}
+	hrd_hashmap_free(cfg->sections);
+	free(cfg);
 }

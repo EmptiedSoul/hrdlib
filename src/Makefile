@@ -16,7 +16,7 @@ objects = $(patsubst %.c,%.o,$(wildcard */*.c))
 
 all: libhrd.so
 
-libhrd.so: ipc-compile config-compile cache-compile file-compile strings-compile
+libhrd.so: ipc-compile config-compile cache-compile file-compile strings-compile hashmap-compile
 	@echo "  CCLD  libhrd.so" 
 	@$(CC) $(FLAGS) $(LDFLAGS) -shared -o libhrd.so ${objects} 
 strings-compile:
@@ -29,6 +29,8 @@ cache-compile:
 	@$(MAKE) -e -C cache
 file-compile:
 	@$(MAKE) -e -C fs
+hashmap-compile:
+	@$(MAKE) -e -C hashmap
 
 clean: 
 	@echo "  CLEAN */*.o"
