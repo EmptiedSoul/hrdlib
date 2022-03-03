@@ -55,7 +55,9 @@ extern int hrd_cache_edit_end(void* addr, size_t size);				/* End editing cached
 
 /* config */
 extern char* hrd_cfg_get_string_at(char* filename, char* section, char* key);
-extern char* hrd_cfg_get_string(hrd_config* cfg, char* section, char* key);			/* Get value for key in cfg file	*/
+extern char* hrd_cfg_get_string(hrd_config* cfg, char* section, char* key); /* Get value for key in cfg file	*/
+extern void hdr_cfg_set_string(hrd_config* cfg, char* section, char* key, char* value);
+
 extern hrd_config* hrd_cfg_read(FILE* stream);
 extern hrd_config* hrd_cfg_read_at(char* filename);
 extern void hrd_cfg_free(hrd_config* cfg);
@@ -64,7 +66,8 @@ extern int   hrd_cfg_put_string_at(char* filename, char* key, char* value);
 extern int   hrd_cfg_put_string(FILE* stream, char* key, char* value);		/* Put key=value to cfg file		*/
 extern int   hrd_cfg_put_strings_at(char* filename, hrd_string_pair keys[]);
 extern int   hrd_cfg_put_strings(FILE* stream, hrd_string_pair keys[]);		/* Put (key=value)n to cfg file		*/
-
+extern int   hrd_cfg_write(hrd_config* cfg, FILE* stream);
+extern int   hrd_cfg_write_at(hrd_config* cfg, char* filename);
 
 hrd_hashmap* hrd_hashmap_create(unsigned int slots);
 void hrd_hashmap_resize(hrd_hashmap* map, unsigned int size);

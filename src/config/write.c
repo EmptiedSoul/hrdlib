@@ -50,3 +50,52 @@ int hrd_cfg_put_strings(FILE* stream, hrd_string_pair keys[]){
 	}
 	return retval;
 }
+
+int hrd_cfg_write(hrd_config* cfg, FILE* stream) {	
+	int retval = 0;
+	if (!cfg || !stream) { 
+		errno = EINVAL;
+		return -1; 
+	}
+	for (hrd_hashmap_slot* slot = cfg->global_keys->first;
+			slot; slot = slot->next) {
+		retval = fprintf(stream, "%s=%s\n", slot->key,
+				slot->value ? (char*)slot->value : "");
+	}
+	if (retval < 0)
+		return retval;
+	for (hrd_hashmap_slot* slot = cfg->sections->first;
+			slot; slot = slot->next) {
+		retval = fprintf(stream, "[%s]\n", slot->key);
+		if (retval < 0)
+			return retval;
+		hrd_hashmap* map = (hrd_hashmap*) slot->value;
+		for (hrd_hashmap_slot* mslot = map->first;
+				mslot; mslot = mslot->next) {
+			retval = fprintf(stream, "%s=%s\n", mslot->key,
+					mslot->value ? (char*)mslot->value : "");
+			if (retval < 0)
+				return retval;
+		}
+	}
+	return retval;
+}
+
+int hrd_cfg_write_at(hrd_config* cfg, char* filename) {
+	if (!cfg || !filename) {
+		errno = EINVAL;
+		return -1;
+	}
+	FILE* stream = fopen(filename, "w");
+	if (!stream) return -1;
+	return hrd_cfg_write(cfg, stream);
+}
+
+void hrd_cfg_set_string(hrd_config* cfg, char* section, char* key, char* value) {
+	if (section) {
+		hrd_hashmap* sct = hrd_hashmap_get_value(cfg->sections, section);
+		hrd_hashmap_set_value(sct, key, value);
+	} else {
+		hrd_hashmap_set_value(cfg->global_keys, key, value);
+	}
+}

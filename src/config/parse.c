@@ -58,6 +58,8 @@ hrd_config* hrd_cfg_read(FILE* stream) {
 		*value_newline = '\0';
 		*equal_sign = '\0';
 		char* key = line;
+		hrd_trim_spaces(key);
+		hrd_trim_spaces(value);
 		if (current_section)
 			hrd_hashmap_set_value(hrd_hashmap_get_value(cfg->sections, current_section), key, strdup(value));
 		else
