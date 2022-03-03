@@ -56,7 +56,7 @@ extern int hrd_cache_edit_end(void* addr, size_t size);				/* End editing cached
 /* config */
 extern char* hrd_cfg_get_string_at(char* filename, char* section, char* key);
 extern char* hrd_cfg_get_string(hrd_config* cfg, char* section, char* key); /* Get value for key in cfg file	*/
-extern void hdr_cfg_set_string(hrd_config* cfg, char* section, char* key, char* value);
+extern void hrd_cfg_set_string(hrd_config* cfg, char* section, char* key, char* value);
 
 extern hrd_config* hrd_cfg_read(FILE* stream);
 extern hrd_config* hrd_cfg_read_at(char* filename);
