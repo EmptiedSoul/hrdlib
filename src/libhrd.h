@@ -6,6 +6,9 @@
 
 #define DEPRECATED __attribute__((deprecated))
 
+#define DO_PRAGMA(x) _Pragma (#x)
+#define TODO(x) DO_PRAGMA(message ("TODO: " #x))
+
 /* data types */
 typedef struct {
 	char* key;
