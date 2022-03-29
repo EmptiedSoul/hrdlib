@@ -126,3 +126,7 @@ void hrd_hashmap_free(hrd_hashmap* map) {
 	free(map->slots);
 	free(map);
 }
+
+void hrd_hashmap_autofree(hrd_hashmap** map) {
+	hrd_hashmap_free(*map);
+}

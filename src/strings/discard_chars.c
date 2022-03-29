@@ -13,7 +13,7 @@
 
 size_t hrd_string_discard_chars(char* string, char to_discard)
 {
-	char* buf;
+	hrd_autofree char* buf = NULL;
 
 	size_t strsize = strlen(string);
 	buf = (char*)malloc(strsize);
@@ -26,11 +26,13 @@ size_t hrd_string_discard_chars(char* string, char to_discard)
 		else
 			discarded_num++;
 	}
+	
+	if (!discarded_num) return strsize;
+
 	buf[strsize - discarded_num] = '\0';
 	
 	size_t written = strlen(buf);
 	strcpy(string, buf);
-	free(buf);
 
 	return written;
 }

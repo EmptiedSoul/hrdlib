@@ -16,10 +16,15 @@
 char* hrd_cfg_get_string(hrd_config* cfg, char* section, char* key){
 	if (section) {
 		hrd_hashmap* map = hrd_hashmap_get_value(cfg->sections, section);
-		if (section)
-			return hrd_hashmap_get_value(map, key);
+		if (section) {
+			char* res = hrd_hashmap_get_value(map, key);
+			if (res)
+				return strdup(res);
+		}
 	} else {
-		return hrd_hashmap_get_value(cfg->global_keys, key);
+		char* res = hrd_hashmap_get_value(cfg->global_keys, key);
+		if (res)
+			return strdup(res);
 	}
 	return NULL;
 }
@@ -90,11 +95,22 @@ char* hrd_cfg_get_string_at(char* filename, char* section, char* key){
 }
 
 void hrd_cfg_free(hrd_config* cfg) {
+	for (hrd_hashmap_slot* slot = cfg->global_keys->first; slot; slot=slot->next){
+		free(slot->value);
+	}
 	hrd_hashmap_free(cfg->global_keys);
 	for (hrd_hashmap_slot* slot = cfg->sections->first; slot; slot = slot->next){
-		if (slot->value)
-			hrd_hashmap_free(slot->value);
+		if (slot->value) {
+			hrd_hashmap* map = slot->value;
+			for (hrd_hashmap_slot* nslot = map->first; nslot; nslot=nslot->next)
+				free(nslot->value);
+			hrd_hashmap_free(map);
+		}
 	}
 	hrd_hashmap_free(cfg->sections);
 	free(cfg);
+}
+
+void hrd_config_autofree(hrd_config** cfg) {
+	return hrd_cfg_free(*cfg);
 }

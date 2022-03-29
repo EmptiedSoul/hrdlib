@@ -11,11 +11,20 @@
 
 #include "../libhrd.h"
 
-void hrd_string_array_free(void** array){
+void _hrd_autofree(void* memory) {
+	void** mem = (void**)memory;
+	free(*mem);
+}
+
+void hrd_string_array_free(char** array){
 	for (int i = 0; array[i]; i++){
 		free(array[i]);
 	}
 	free(array);
+}
+
+void hrd_string_array_autofree(char*** array) {
+	hrd_string_array_free(*array);
 }
 
 void hrd_string_pair_array_free(hrd_string_pair* array){

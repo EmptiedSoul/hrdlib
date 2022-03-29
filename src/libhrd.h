@@ -9,7 +9,16 @@
 #define DO_PRAGMA(x) _Pragma (#x)
 #define TODO(x) DO_PRAGMA(message ("TODO: " #x))
 
+#define _HRD_TYPE_CLEANUP_FUNC(type) __cleanup__(type##_autofree)
+#define hrd_auto_ptr(type) __attribute__((_HRD_TYPE_CLEANUP_FUNC(type))) type*
+#define hrd_autofree	   __attribute__((__cleanup__(_hrd_autofree))) 
+
 /* data types */
+
+typedef char** hrd_string_array; 
+/* Always referred as char**, this alias only used 
+ * for hrd_auto_ptr() macro 		*/
+
 typedef struct {
 	char* key;
 	char* value;
@@ -65,6 +74,8 @@ extern hrd_config* hrd_cfg_read(FILE* stream);
 extern hrd_config* hrd_cfg_read_at(char* filename);
 extern void hrd_cfg_free(hrd_config* cfg);
 
+extern void hrd_config_autofree(hrd_config** cfg);
+
 extern int   hrd_cfg_put_string_at(char* filename, char* key, char* value);
 extern int   hrd_cfg_put_string(FILE* stream, char* key, char* value);		/* Put key=value to cfg file		*/
 extern int   hrd_cfg_put_strings_at(char* filename, hrd_string_pair keys[]);
@@ -72,18 +83,24 @@ extern int   hrd_cfg_put_strings(FILE* stream, hrd_string_pair keys[]);		/* Put 
 extern int   hrd_cfg_write(hrd_config* cfg, FILE* stream);
 extern int   hrd_cfg_write_at(hrd_config* cfg, char* filename);
 
-hrd_hashmap* hrd_hashmap_create(unsigned int slots);
-void hrd_hashmap_resize(hrd_hashmap* map, unsigned int size);
-void hrd_hashmap_set_value(hrd_hashmap* map, char* key, void* value);
-void* hrd_hashmap_get_value(hrd_hashmap* map, char* key);
-void hrd_hashmap_remove_value(hrd_hashmap* map, char* key);
-void hrd_hashmap_free(hrd_hashmap* map);
+
+/* hashmap */
+hrd_hashmap* 	hrd_hashmap_create(unsigned int slots);
+void 		hrd_hashmap_resize(hrd_hashmap* map, unsigned int size);
+void 		hrd_hashmap_set_value(hrd_hashmap* map, char* key, void* value);
+void* 		hrd_hashmap_get_value(hrd_hashmap* map, char* key);
+void		hrd_hashmap_remove_value(hrd_hashmap* map, char* key);
+void 		hrd_hashmap_free(hrd_hashmap* map);
+void 		hrd_hashmap_autofree(hrd_hashmap** map);
 
 /* strings */
 extern size_t hrd_string_discard_chars(char* string, char to_discard);		/* discard chars from string		*/
 extern char** hrd_string_split(char* string, char* delimiters);			/* split string				*/
-extern void   hrd_string_array_free(void** array);				/* free string array (splitted string)	*/
+extern void   hrd_string_array_free(char** array);				/* free string array (splitted string)	*/
+extern void   hrd_string_array_push(char*** array, char* string);
+extern void   hrd_string_array_autofree(char*** array);
 #define hrd_array_free(x) hrd_string_array_free(x);
+
 extern void   hrd_string_pair_array_free(hrd_string_pair* array);		/* free string pair array		*/
 extern void   hrd_string_pair_array_free_stackkeys(hrd_string_pair* array);
 extern void   hrd_string_pair_array_free_keysonly(hrd_string_pair* array);
@@ -92,5 +109,5 @@ extern void   hrd_string_pair_array_free_keysonly(hrd_string_pair* array);
 #define hrd_string_pair_array_foreach(iter, x) \
 	for (int iter = 0; (x)[iter].key; iter++)				/* iterate thru string pair array	*/
 extern void   hrd_trim_spaces(char* string);					/* trim leading and trailing spaces	*/
-
+extern void   _hrd_autofree(void* mem);
 #endif
