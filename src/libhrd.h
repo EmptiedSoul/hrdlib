@@ -3,6 +3,9 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
 
 #define DEPRECATED __attribute__((deprecated))
 
@@ -15,7 +18,7 @@
 
 /* data types */
 
-typedef char** hrd_string_array; 
+typedef char* hrd_string_array; 
 /* Always referred as char**, this alias only used 
  * for hrd_auto_ptr() macro 		*/
 
@@ -99,7 +102,13 @@ extern char** hrd_string_split(char* string, char* delimiters);			/* split strin
 extern void   hrd_string_array_free(char** array);				/* free string array (splitted string)	*/
 extern void   hrd_string_array_push(char*** array, char* string);
 extern void   hrd_string_array_autofree(char*** array);
+extern char*  hrd_sprintf(char* fmt, ...);
 #define hrd_array_free(x) hrd_string_array_free(x);
+
+
+inline bool hrd_string_has_prefix(char* prefix, char* string) {
+	return !(strncmp(prefix, string, strlen(prefix)));
+}
 
 extern void   hrd_string_pair_array_free(hrd_string_pair* array);		/* free string pair array		*/
 extern void   hrd_string_pair_array_free_stackkeys(hrd_string_pair* array);
