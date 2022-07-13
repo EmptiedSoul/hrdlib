@@ -60,6 +60,6 @@ bool hrd_file_exist(char* filename, int flags)
 		}
 	}
 	return true;
- failed:
+failed:
 	return false;
 }

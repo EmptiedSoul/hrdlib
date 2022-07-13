@@ -21,15 +21,15 @@ char** hrd_string_split(char* string, char* delimiters)
 
 	while (token != NULL) {
 		tokens_array =
-		    (char **)realloc(tokens_array, sizeof(char *) * (i + 1));
-		tokens_array[i] = (char *)malloc(strlen(token) + 1);
+			(char**)realloc(tokens_array, sizeof(char*) * (i + 1));
+		tokens_array[i] = (char*)malloc(strlen(token) + 1);
 		memset(tokens_array[i], 0, strlen(token) + 1);
 		strcpy(tokens_array[i], token);
 		token = strtok(NULL, delimiters);
 		i++;
 	}
 
-	tokens_array = (char **)realloc(tokens_array, sizeof(char *) * (i + 1));
+	tokens_array = (char**)realloc(tokens_array, sizeof(char*) * (i + 1));
 	tokens_array[i] = NULL;
 
 	return tokens_array;

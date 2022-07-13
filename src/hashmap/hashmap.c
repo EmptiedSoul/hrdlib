@@ -9,10 +9,12 @@
 #include "../libhrd.h"
 
 /* Allocate 1 page for hashmap (most efficient way, i guess) */
-#define DEFAULT_MAP_SIZE ( (sysconf(_SC_PAGESIZE) - sizeof(hrd_hashmap)) / sizeof(hrd_hashmap_slot) )
+#define DEFAULT_MAP_SIZE                                                       \
+	((sysconf(_SC_PAGESIZE) - sizeof(hrd_hashmap)) /                       \
+	 sizeof(hrd_hashmap_slot))
 
 /* FNV1a from wikipedia */
-static inline unsigned int get_index(hrd_hashmap * map, hrd_hashmap_slot * slot)
+static inline unsigned int get_index(hrd_hashmap* map, hrd_hashmap_slot* slot)
 {
 	unsigned int hval = 0x811c9dc5;
 	const unsigned int FNV_32_PRIME = 0x01000193;
@@ -24,8 +26,8 @@ static inline unsigned int get_index(hrd_hashmap * map, hrd_hashmap_slot * slot)
 	slot->hash = hval;
 	unsigned int index = hval % map->total_slots;
 	for (;;) {
-		if (map->slots[index].key == NULL
-		    || !strcmp(slot->key, map->slots[index].key)) {
+		if (map->slots[index].key == NULL ||
+		    !strcmp(slot->key, map->slots[index].key)) {
 			return index;
 		} else {
 			index = (index + 1) % map->total_slots;
@@ -46,16 +48,15 @@ hrd_hashmap* hrd_hashmap_create(unsigned int slots)
 	return map;
 }
 
-static hrd_hashmap_slot* resize_entry(hrd_hashmap * m,
-				      hrd_hashmap_slot * old_entry)
+static hrd_hashmap_slot* resize_entry(hrd_hashmap* m,
+				      hrd_hashmap_slot* old_entry)
 {
 	uint32_t index = old_entry->hash % m->total_slots;
 	for (;;) {
-		hrd_hashmap_slot* entry =
-		    (hrd_hashmap_slot *) & m->slots[index];
+		hrd_hashmap_slot* entry = (hrd_hashmap_slot*)&m->slots[index];
 
 		if (entry->key == NULL) {
-			*entry = *old_entry;	// copy data from old entry
+			*entry = *old_entry; // copy data from old entry
 			return entry;
 		}
 
@@ -63,12 +64,12 @@ static hrd_hashmap_slot* resize_entry(hrd_hashmap * m,
 	}
 }
 
-void hrd_hashmap_resize(hrd_hashmap * map, unsigned int size)
+void hrd_hashmap_resize(hrd_hashmap* map, unsigned int size)
 {
 	hrd_hashmap_slot* old_slots = map->slots;
 	map->total_slots = size;
 	map->slots = calloc(sizeof(hrd_hashmap_slot), size);
-	map->last = (hrd_hashmap_slot *) & map->first;
+	map->last = (hrd_hashmap_slot*)&map->first;
 	do {
 		hrd_hashmap_slot* current = map->last->next;
 		if (current->key == NULL) {
@@ -82,7 +83,7 @@ void hrd_hashmap_resize(hrd_hashmap * map, unsigned int size)
 	free(old_slots);
 }
 
-void hrd_hashmap_set_value(hrd_hashmap * map, char* key, void* value)
+void hrd_hashmap_set_value(hrd_hashmap* map, char* key, void* value)
 {
 	if (((float)map->occupied_slots / (float)map->total_slots) > 0.75)
 		hrd_hashmap_resize(map, map->total_slots * 2);
@@ -102,7 +103,7 @@ void hrd_hashmap_set_value(hrd_hashmap * map, char* key, void* value)
 		map->first = &map->slots[index];
 }
 
-void* hrd_hashmap_get_value(hrd_hashmap * map, char* key)
+void* hrd_hashmap_get_value(hrd_hashmap* map, char* key)
 {
 	hrd_hashmap_slot slot;
 	slot.key = key;
@@ -110,7 +111,7 @@ void* hrd_hashmap_get_value(hrd_hashmap * map, char* key)
 	return map->slots[index].value;
 }
 
-void hrd_hashmap_remove_value(hrd_hashmap * map, char* key)
+void hrd_hashmap_remove_value(hrd_hashmap* map, char* key)
 {
 	hrd_hashmap_slot slot;
 	slot.key = key;
@@ -125,16 +126,16 @@ void hrd_hashmap_remove_value(hrd_hashmap * map, char* key)
 	map->slots[index].hash = 0;
 }
 
-void hrd_hashmap_free(hrd_hashmap * map)
+void hrd_hashmap_free(hrd_hashmap* map)
 {
-	for (hrd_hashmap_slot * next = map->first; next; next = next->next) {
+	for (hrd_hashmap_slot* next = map->first; next; next = next->next) {
 		free(next->key);
 	}
 	free(map->slots);
 	free(map);
 }
 
-void hrd_hashmap_autofree(hrd_hashmap ** map)
+void hrd_hashmap_autofree(hrd_hashmap** map)
 {
 	hrd_hashmap_free(*map);
 }

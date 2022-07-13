@@ -8,7 +8,7 @@ void hrd_string_array_push(char*** array, char* string)
 	int i = 0;
 	while ((*array)[i] != NULL)
 		i++;
-	*array = realloc(*array, sizeof(void *) * (i + 2));
+	*array = realloc(*array, sizeof(void*) * (i + 2));
 	(*array)[i] = strdup(string);
 	(*array)[i + 1] = NULL;
 }

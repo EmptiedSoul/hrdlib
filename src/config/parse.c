@@ -13,11 +13,11 @@
 
 /* Parser for INI- and Bash-like configuration files */
 
-char* hrd_cfg_get_string(hrd_config * cfg, char* section, char* key)
+char* hrd_cfg_get_string(hrd_config* cfg, char* section, char* key)
 {
 	if (section) {
 		hrd_hashmap* map =
-		    hrd_hashmap_get_value(cfg->sections, section);
+			hrd_hashmap_get_value(cfg->sections, section);
 		if (section) {
 			char* res = hrd_hashmap_get_value(map, key);
 			if (res)
@@ -31,7 +31,7 @@ char* hrd_cfg_get_string(hrd_config * cfg, char* section, char* key)
 	return NULL;
 }
 
-hrd_config* hrd_cfg_read(FILE * stream)
+hrd_config* hrd_cfg_read(FILE* stream)
 {
 	char* line = NULL;
 	size_t buflen = 0;
@@ -45,9 +45,9 @@ hrd_config* hrd_cfg_read(FILE * stream)
 	 * Passing 0 will lead to memory overuse */
 
 	while ((nread = getline(&line, &buflen, stream)) != -1) {
-		if (*line == '#' || *line == ';' || *line == '\n')	/* Comment */
+		if (*line == '#' || *line == ';' || *line == '\n') /* Comment */
 			continue;
-		if (*line == '[') {	/* INI Section header */
+		if (*line == '[') { /* INI Section header */
 			char* section = line + 1;
 			section[strlen(section) - 2] = '\0';
 			if (current_section)
@@ -70,9 +70,10 @@ hrd_config* hrd_cfg_read(FILE * stream)
 		hrd_trim_spaces(key);
 		hrd_trim_spaces(value);
 		if (current_section)
-			hrd_hashmap_set_value(hrd_hashmap_get_value
-					      (cfg->sections, current_section),
-					      key, strdup(value));
+			hrd_hashmap_set_value(
+				hrd_hashmap_get_value(cfg->sections,
+						      current_section),
+				key, strdup(value));
 		else
 			hrd_hashmap_set_value(cfg->global_keys, key,
 					      strdup(value));
@@ -103,18 +104,18 @@ char* hrd_cfg_get_string_at(char* filename, char* section, char* key)
 		return NULL;
 }
 
-void hrd_cfg_free(hrd_config * cfg)
+void hrd_cfg_free(hrd_config* cfg)
 {
-	for (hrd_hashmap_slot * slot = cfg->global_keys->first; slot;
+	for (hrd_hashmap_slot* slot = cfg->global_keys->first; slot;
 	     slot = slot->next) {
 		free(slot->value);
 	}
 	hrd_hashmap_free(cfg->global_keys);
-	for (hrd_hashmap_slot * slot = cfg->sections->first; slot;
+	for (hrd_hashmap_slot* slot = cfg->sections->first; slot;
 	     slot = slot->next) {
 		if (slot->value) {
 			hrd_hashmap* map = slot->value;
-			for (hrd_hashmap_slot * nslot = map->first; nslot;
+			for (hrd_hashmap_slot* nslot = map->first; nslot;
 			     nslot = nslot->next)
 				free(nslot->value);
 			hrd_hashmap_free(map);
@@ -124,7 +125,7 @@ void hrd_cfg_free(hrd_config * cfg)
 	free(cfg);
 }
 
-void hrd_config_autofree(hrd_config ** cfg)
+void hrd_config_autofree(hrd_config** cfg)
 {
 	return hrd_cfg_free(*cfg);
 }

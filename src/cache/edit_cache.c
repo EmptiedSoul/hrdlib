@@ -11,7 +11,7 @@
 
 #include "../libhrd.h"
 
-extern char* _hrd_cache_dir;	/* cache/cache.c */
+extern char* _hrd_cache_dir; /* cache/cache.c */
 
 void* hrd_cache_edit_data(char* filename, size_t size)
 {
@@ -29,7 +29,7 @@ void* hrd_cache_edit_data(char* filename, size_t size)
 		return NULL;
 
 	void* buffer =
-	    mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
+		mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
 	(void)close(file);
 	return buffer;
 }

@@ -11,7 +11,7 @@
 
 #include "../libhrd.h"
 
-extern char* _hrd_cache_dir;	/* cache/cache.c */
+extern char* _hrd_cache_dir; /* cache/cache.c */
 
 size_t hrd_uncache_get_size(char* filename)
 {
