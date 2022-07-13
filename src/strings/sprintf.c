@@ -9,13 +9,14 @@
 
 #include "../libhrd.h"
 
-char* hrd_sprintf(char* fmt, ...) {
+char* hrd_sprintf(char* fmt, ...)
+{
 	va_list ap;
 	char* str;
 
 	va_start(ap, fmt);
 	if (vasprintf(&str, fmt, ap) == -1)
-		str = NULL; 
+		str = NULL;
 	va_end(ap);
 
 	return str;

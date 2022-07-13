@@ -12,7 +12,8 @@
 
 #include "../libhrd.h"
 
-void hrd_trim_spaces(char* string){
+void hrd_trim_spaces(char* string)
+{
 	char* p = string;
 	int l = strlen(p);
 
@@ -20,7 +21,8 @@ void hrd_trim_spaces(char* string){
 		p[--l] = 0;
 	}
 	while (*p && isspace(*p)) {
-		++p; --l;
+		++p;
+		--l;
 	}
 
 	memmove(string, p, l + 1);

@@ -11,26 +11,30 @@
 
 #include "../libhrd.h"
 
-extern char* _hrd_cache_dir; /* cache/cache.c */
+extern char* _hrd_cache_dir;	/* cache/cache.c */
 
-void* hrd_cache_edit_data(char* filename, size_t size){
-	if (_hrd_cache_dir == NULL){
+void* hrd_cache_edit_data(char* filename, size_t size)
+{
+	if (_hrd_cache_dir == NULL) {
 		errno = ENOENT;
 		return NULL;
-	} 
-	if (filename == NULL){
+	}
+	if (filename == NULL) {
 		errno = EINVAL;
 		return NULL;
 	}
 	int file = open(filename, O_RDWR);
-	
-	if (file == -1) return NULL;
 
-	void* buffer = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
+	if (file == -1)
+		return NULL;
+
+	void* buffer =
+	    mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
 	(void)close(file);
 	return buffer;
 }
 
-int hrd_cache_edit_end(void* buffer, size_t size){
-	return munmap(buffer, size);	
+int hrd_cache_edit_end(void* buffer, size_t size)
+{
+	return munmap(buffer, size);
 }
