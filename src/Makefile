@@ -5,7 +5,7 @@ CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto -fuse-linker-plugin -fuse-ld=go
 export CFLAGS
 DBGFLAGS = -g3 -ggdb3
 export DBGFLAGS
-WARNFLAGS = -Wall -pedantic -Wextra -Wshadow -Werror
+WARNFLAGS = -Wall -pedantic -Wextra -Wshadow -Werror -Wno-pointer-arith
 LDFLAGS = -Wl,-O1  
 
 MAKEFLAGS += --no-print-directory

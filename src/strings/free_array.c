@@ -22,7 +22,7 @@ void hrd_string_array_free(char** array)
 	for (int i = 0; array[i]; i++) {
 		free(array[i]);
 	}
-	free(array);
+	free((unsigned long*)array - 1);
 }
 
 void hrd_string_array_autofree(char*** array)
