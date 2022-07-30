@@ -7,7 +7,7 @@
 
 #include "../libhrd.h"
 
-bool hrd_file_exist(char* filename, int flags)
+bool hrd_file_exists(char* filename, int flags)
 {
 	struct stat file_stats;
 	int retval = stat(filename, &file_stats);

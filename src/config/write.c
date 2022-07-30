@@ -48,7 +48,7 @@ int hrd_cfg_put_strings(FILE* stream, hrd_string_pair keys[])
 		return -1;
 	}
 	int retval = 0;
-	hrd_string_pair_array_foreach(i, keys)
+	hrd_string_pair_array_for(i, keys)
 	{
 		retval = fprintf(stream, "%s=%s\n", keys[i].key, keys[i].value);
 		if (retval < 0)

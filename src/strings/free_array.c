@@ -32,7 +32,7 @@ void hrd_string_array_autofree(char*** array)
 
 void hrd_string_pair_array_free(hrd_string_pair* array)
 {
-	hrd_string_pair_array_foreach(i, array)
+	hrd_string_pair_array_for(i, array)
 	{
 		free(array[i].key);
 		if (array[i].value)
@@ -43,7 +43,7 @@ void hrd_string_pair_array_free(hrd_string_pair* array)
 
 void hrd_string_pair_array_free_stackkeys(hrd_string_pair* array)
 {
-	hrd_string_pair_array_foreach(i, array)
+	hrd_string_pair_array_for(i, array)
 	{
 		if (array[i].value)
 			free(array[i].value);
@@ -53,7 +53,7 @@ void hrd_string_pair_array_free_stackkeys(hrd_string_pair* array)
 
 void hrd_string_pair_array_free_keysonly(hrd_string_pair* array)
 {
-	hrd_string_pair_array_foreach(i, array)
+	hrd_string_pair_array_for(i, array)
 	{
 		if (array[i].value)
 			free(array[i].value);
