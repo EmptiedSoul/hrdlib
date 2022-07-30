@@ -15,7 +15,7 @@ char* _hrd_cache_dir = NULL;
 
 int hrd_cache_set_dir(char* dir)
 {
-	if (hrd_file_exist(dir, HRDFS_ISDIR)) {
+	if (hrd_file_exists(dir, HRDFS_ISDIR)) {
 		_hrd_cache_dir = dir;
 	} else {
 		errno = ENOENT;
