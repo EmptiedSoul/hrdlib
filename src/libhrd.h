@@ -148,6 +148,9 @@ extern void hrd_string_pair_array_free_keysonly(hrd_string_pair* array);
 #define hrd_string_pair_array_foreach(iter, x)                                 \
 	for (typeof((x)) iter = (x); iter.key; iter++)
 
+#define hrd_type_for(type, iter, array) hrd_##type##_for(iter, array)
+#define hrd_type_foreach(type, iter, array) hrd_##type##_foreach(iter, array)
+
 extern void
 hrd_trim_spaces(char* string); /* trim leading and trailing spaces	*/
 extern void _hrd_autofree(void* mem);
