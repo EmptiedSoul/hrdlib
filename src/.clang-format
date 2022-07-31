@@ -73,6 +73,8 @@ ForEachMacros:
   - 'hrd_string_array_for'
   - 'hrd_string_pair_foreach'
   - 'hrd_string_pair_for'
+  - 'hrd_type_for'
+  - 'hrd_type_foreach'
 
 #IncludeBlocks: Preserve # Unknown to clang-format-5.0
 IncludeCategories:
