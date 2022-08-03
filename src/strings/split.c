@@ -17,8 +17,9 @@ char** hrd_string_split(char* string, char* delimiters)
 	char* token = NULL;
 	unsigned long int i = 0;
 	size_t long_size = sizeof(unsigned long);
+	char* tmp = NULL;
 
-	token = strtok(string, delimiters);
+	token = strtok_r(string, delimiters, &tmp);
 
 	void* mem = malloc(long_size);
 
@@ -28,7 +29,7 @@ char** hrd_string_split(char* string, char* delimiters)
 		tokens_array[i] = (char*)malloc(strlen(token) + 1);
 		memset(tokens_array[i], 0, strlen(token) + 1);
 		strcpy(tokens_array[i], token);
-		token = strtok(NULL, delimiters);
+		token = strtok_r(NULL, delimiters, &tmp);
 		i++;
 	}
 
