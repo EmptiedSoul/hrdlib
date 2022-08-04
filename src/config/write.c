@@ -95,7 +95,7 @@ int hrd_cfg_write_at(hrd_config* cfg, char* filename)
 		errno = EINVAL;
 		return -1;
 	}
-	FILE* stream = fopen(filename, "w");
+	hrd_auto_ptr(FILE) stream = fopen(filename, "w");
 	if (!stream)
 		return -1;
 	return hrd_cfg_write(cfg, stream);
@@ -106,6 +106,8 @@ void hrd_cfg_set_string(hrd_config* cfg, char* section, char* key, char* value)
 	if (section) {
 		hrd_hashmap* sct =
 			hrd_hashmap_get_value(cfg->sections, section);
+		if (!sct)
+			return;
 		hrd_hashmap_set_value(sct, key, value);
 	} else {
 		hrd_hashmap_set_value(cfg->global_keys, key, value);

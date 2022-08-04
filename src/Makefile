@@ -1,11 +1,11 @@
 CC = gcc
 DESTDIR=
 ADDFLAGS =
-CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto -fuse-linker-plugin -fuse-ld=gold -fPIC -floop-block -floop-interchange -ftree-loop-distribution -floop-strip-mine 
+CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto=jobserver -fuse-linker-plugin -fuse-ld=gold -fPIC -floop-block -floop-interchange -ftree-loop-distribution -floop-strip-mine -fanalyzer #-fanalyzer-verbosity=3
 export CFLAGS
 DBGFLAGS = -g3 -ggdb3
 export DBGFLAGS
-WARNFLAGS = -Wall -pedantic -Wextra -Wshadow -Werror -Wno-pointer-arith
+WARNFLAGS = -Wall -pedantic -Wextra -Wshadow -Werror -Wno-pointer-arith -Wno-analyzer-malloc-leak
 LDFLAGS = -Wl,-O1  
 
 MAKEFLAGS += --no-print-directory
@@ -16,9 +16,9 @@ objects = $(patsubst %.c,%.o,$(wildcard */*.c))
 
 all: libhrd.so
 
-libhrd.so: ipc-compile config-compile cache-compile file-compile strings-compile hashmap-compile
+libhrd.so: ipc-compile config-compile cache-compile file-compile strings-compile hashmap-compile misc-compile
 	@echo "  CCLD  libhrd.so" 
-	@$(CC) $(FLAGS) $(LDFLAGS) -shared -o libhrd.so ${objects} 
+	+@$(CC) $(FLAGS) $(LDFLAGS) -shared -o libhrd.so ${objects} 
 strings-compile:
 	@$(MAKE) -e -C strings
 ipc-compile:
@@ -31,6 +31,8 @@ file-compile:
 	@$(MAKE) -e -C fs
 hashmap-compile:
 	@$(MAKE) -e -C hashmap
+misc-compile:
+	@$(MAKE) -e -C misc
 
 clean: 
 	@echo "  CLEAN */*.o"

@@ -38,6 +38,8 @@ static inline unsigned int get_index(hrd_hashmap* map, hrd_hashmap_slot* slot)
 hrd_hashmap* hrd_hashmap_create(unsigned int slots)
 {
 	hrd_hashmap* map = malloc(sizeof(hrd_hashmap));
+	if (!map)
+		return NULL;
 	if (!slots)
 		slots = DEFAULT_MAP_SIZE;
 	map->slots = calloc(sizeof(hrd_hashmap_slot), slots);
@@ -53,7 +55,7 @@ static hrd_hashmap_slot* resize_entry(hrd_hashmap* m,
 {
 	uint32_t index = old_entry->hash % m->total_slots;
 	for (;;) {
-		hrd_hashmap_slot* entry = (hrd_hashmap_slot*)&m->slots[index];
+		hrd_hashmap_slot* entry = &(m->slots[index]);
 
 		if (entry->key == NULL) {
 			*entry = *old_entry; // copy data from old entry
@@ -64,12 +66,20 @@ static hrd_hashmap_slot* resize_entry(hrd_hashmap* m,
 	}
 }
 
-void hrd_hashmap_resize(hrd_hashmap* map, unsigned int size)
+bool hrd_hashmap_resize(hrd_hashmap* map, unsigned int size)
 {
+	if (!map)
+		return false;
+	if ((unsigned int)map->occupied_slots >= size)
+		return false;
+
+	void* mem = malloc(sizeof(hrd_hashmap_slot) * size);
+	if (!mem)
+		return false;
 	hrd_hashmap_slot* old_slots = map->slots;
 	map->total_slots = size;
-	map->slots = calloc(sizeof(hrd_hashmap_slot), size);
-	map->last = (hrd_hashmap_slot*)&map->first;
+	map->slots = mem;
+	map->last = map->first;
 	do {
 		hrd_hashmap_slot* current = map->last->next;
 		if (current->key == NULL) {
@@ -81,15 +91,32 @@ void hrd_hashmap_resize(hrd_hashmap* map, unsigned int size)
 		map->last = map->last->next;
 	} while (map->last->next != NULL);
 	free(old_slots);
+	return true;
 }
 
-void hrd_hashmap_set_value(hrd_hashmap* map, char* key, void* value)
+bool hrd_hashmap_set_value(hrd_hashmap* map, char* key, void* value)
 {
-	if (((float)map->occupied_slots / (float)map->total_slots) > 0.75)
-		hrd_hashmap_resize(map, map->total_slots * 2);
+	if (!map || !key)
+		return false;
 	hrd_hashmap_slot slot;
-	slot.key = strdup(key);
 	slot.value = value;
+	slot.key = strdup(key);
+	if (slot.key == NULL) {
+		return false;
+	}
+	if (((float)map->occupied_slots / (float)map->total_slots) > 0.75) {
+		/* gcc analyzer false-positive leak
+	 * valgrind approval: (not tested) 
+	 * last tested:       (not tested)
+	 */
+		_Pragma("GCC diagnostic push");
+		_Pragma("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"");
+		if (!hrd_hashmap_resize(map, map->total_slots * 2)) {
+			_Pragma("GCC diagnostic pop");
+			free(slot.key);
+			return false;
+		}
+	}
 	unsigned int index = get_index(map, &slot);
 	hrd_hashmap_slot* last = map->last;
 	map->slots[index] = slot;
@@ -101,10 +128,13 @@ void hrd_hashmap_set_value(hrd_hashmap* map, char* key, void* value)
 	map->occupied_slots += 1;
 	if (map->first == NULL)
 		map->first = &map->slots[index];
+	return true;
 }
 
 void* hrd_hashmap_get_value(hrd_hashmap* map, char* key)
 {
+	if (!map || !key)
+		return NULL;
 	hrd_hashmap_slot slot;
 	slot.key = key;
 	unsigned int index = get_index(map, &slot);

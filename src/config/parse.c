@@ -39,10 +39,18 @@ hrd_config* hrd_cfg_read(FILE* stream)
 	char* current_section = NULL;
 
 	hrd_config* cfg = malloc(sizeof(hrd_config));
+	if (!cfg)
+		goto oom_0;
+
 	cfg->global_keys = hrd_hashmap_create(0);
-	cfg->sections = hrd_hashmap_create(20);
+	if (!cfg->global_keys)
+		goto oom_1;
+
 	/* 20 sections should be enough for average INI file 
 	 * Passing 0 will lead to memory overuse */
+	cfg->sections = hrd_hashmap_create(20);
+	if (!cfg->sections)
+		goto oom_2;
 
 	while ((nread = getline(&line, &buflen, stream)) != -1) {
 		if (*line == '#' || *line == ';' || *line == '\n') /* Comment */
@@ -53,8 +61,16 @@ hrd_config* hrd_cfg_read(FILE* stream)
 			if (current_section)
 				free(current_section);
 			current_section = strdup(section);
-			hrd_hashmap_set_value(cfg->sections, section,
-					      hrd_hashmap_create(0));
+			if (!current_section)
+				break;
+			hrd_hashmap* map = hrd_hashmap_create(0);
+			if (!map)
+				break;
+			if (!hrd_hashmap_set_value(cfg->sections, section,
+						   map)) {
+				hrd_hashmap_free(map);
+				break;
+			}
 			continue;
 		}
 		char* equal_sign = strchr(line, '=');
@@ -69,19 +85,39 @@ hrd_config* hrd_cfg_read(FILE* stream)
 		char* key = line;
 		hrd_trim_spaces(key);
 		hrd_trim_spaces(value);
-		if (current_section)
-			hrd_hashmap_set_value(
-				hrd_hashmap_get_value(cfg->sections,
-						      current_section),
-				key, strdup(value));
-		else
-			hrd_hashmap_set_value(cfg->global_keys, key,
-					      strdup(value));
+		if (current_section) {
+			char* dupval = strdup(value);
+			if (!dupval)
+				break;
+			if (!hrd_hashmap_set_value(
+				    hrd_hashmap_get_value(cfg->sections,
+							  current_section),
+				    key, dupval)) {
+				free(dupval);
+				break;
+			}
+		} else {
+			char* dupval = strdup(value);
+			if (!dupval)
+				break;
+			if (!hrd_hashmap_set_value(cfg->global_keys, key,
+						   dupval)) {
+				free(dupval);
+				break;
+			}
+		}
 	}
 	if (current_section)
 		free(current_section);
 	free(line);
 	return cfg;
+
+oom_2:
+	hrd_hashmap_free(cfg->global_keys);
+oom_1:
+	free(cfg);
+oom_0:
+	return NULL;
 }
 
 hrd_config* hrd_cfg_read_at(char* filename)
@@ -97,7 +133,7 @@ hrd_config* hrd_cfg_read_at(char* filename)
 
 char* hrd_cfg_get_string_at(char* filename, char* section, char* key)
 {
-	hrd_config* cfg = hrd_cfg_read_at(filename);
+	hrd_auto_ptr(hrd_config) cfg = hrd_cfg_read_at(filename);
 	if (cfg)
 		return hrd_cfg_get_string(cfg, section, key);
 	else
@@ -106,6 +142,8 @@ char* hrd_cfg_get_string_at(char* filename, char* section, char* key)
 
 void hrd_cfg_free(hrd_config* cfg)
 {
+	if (!cfg)
+		return;
 	for (hrd_hashmap_slot* slot = cfg->global_keys->first; slot;
 	     slot = slot->next) {
 		free(slot->value);

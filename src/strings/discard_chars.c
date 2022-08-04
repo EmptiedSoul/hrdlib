@@ -17,6 +17,8 @@ size_t hrd_string_discard_chars(char* string, char to_discard)
 
 	size_t strsize = strlen(string);
 	buf = (char*)malloc(strsize);
+	if (!buf)
+		return 0;
 
 	int discarded_num = 0;
 
