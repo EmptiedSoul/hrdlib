@@ -1,7 +1,7 @@
 CC = gcc
 DESTDIR=
 ADDFLAGS =
-CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto=jobserver -fuse-linker-plugin -fuse-ld=gold -fPIC -floop-block -floop-interchange -ftree-loop-distribution -floop-strip-mine -fanalyzer #-fanalyzer-verbosity=3
+CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto=jobserver -fuse-linker-plugin -fuse-ld=gold -fPIC -floop-block -floop-interchange -ftree-loop-distribution -floop-strip-mine #-fanalyzer #-fanalyzer-verbosity=3
 export CFLAGS
 DBGFLAGS = -g3 -ggdb3
 export DBGFLAGS

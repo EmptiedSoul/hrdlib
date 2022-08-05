@@ -53,6 +53,8 @@ hrd_hashmap* hrd_hashmap_create(unsigned int slots)
 static hrd_hashmap_slot* resize_entry(hrd_hashmap* m,
 				      hrd_hashmap_slot* old_entry)
 {
+	if (!old_entry || !m)
+		return NULL;
 	uint32_t index = old_entry->hash % m->total_slots;
 	for (;;) {
 		hrd_hashmap_slot* entry = &(m->slots[index]);
@@ -72,14 +74,20 @@ bool hrd_hashmap_resize(hrd_hashmap* map, unsigned int size)
 		return false;
 	if ((unsigned int)map->occupied_slots >= size)
 		return false;
-
-	void* mem = malloc(sizeof(hrd_hashmap_slot) * size);
+	void* mem = calloc(sizeof(hrd_hashmap_slot), size);
 	if (!mem)
 		return false;
+
 	hrd_hashmap_slot* old_slots = map->slots;
-	map->total_slots = size;
+	hrd_hashmap_slot* last = map->last;
+	map->last = (hrd_hashmap_slot*)&map->first;
+	//if (map->last || map->last->next == NULL) {
+	//	free(mem);
+	//		map->last = last;
+	//		return false;
+	//	}
 	map->slots = mem;
-	map->last = map->first;
+	map->total_slots = size;
 	do {
 		hrd_hashmap_slot* current = map->last->next;
 		if (current->key == NULL) {
