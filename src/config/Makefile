@@ -1,4 +1,4 @@
-CC = gcc
+CC ?= gcc
 ADDFLAGS =
 CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto -fuse-linker-plugin -fuse-ld=gold -floop-interchange -ftree-loop-distribution -floop-strip-mine -floop-block -fPIC
 DBGFLAGS =

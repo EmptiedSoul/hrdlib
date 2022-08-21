@@ -1,9 +1,9 @@
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <sys/types.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "../libhrd.h"
@@ -74,30 +74,31 @@ bool hrd_hashmap_resize(hrd_hashmap* map, unsigned int size)
 		return false;
 	if ((unsigned int)map->occupied_slots >= size)
 		return false;
+	/* resizing of empty map */
+	if (!map->first || !map->last)
+		return false;
 	void* mem = calloc(sizeof(hrd_hashmap_slot), size);
 	if (!mem)
 		return false;
 
 	hrd_hashmap_slot* old_slots = map->slots;
-	hrd_hashmap_slot* last = map->last;
 	map->last = (hrd_hashmap_slot*)&map->first;
-	//if (map->last || map->last->next == NULL) {
-	//	free(mem);
-	//		map->last = last;
-	//		return false;
-	//	}
 	map->slots = mem;
 	map->total_slots = size;
+
 	do {
 		hrd_hashmap_slot* current = map->last->next;
 		if (current->key == NULL) {
 			map->last->next = current->next;
+			map->last->prev = current->prev;
 			continue;
 		}
 
 		map->last->next = resize_entry(map, map->last->next);
+		map->last->next->prev = map->last;
 		map->last = map->last->next;
 	} while (map->last->next != NULL);
+
 	free(old_slots);
 	return true;
 }
@@ -113,19 +114,15 @@ bool hrd_hashmap_set_value(hrd_hashmap* map, char* key, void* value)
 		return false;
 	}
 	if (((float)map->occupied_slots / (float)map->total_slots) > 0.75) {
-		/* gcc analyzer false-positive leak
-	 * valgrind approval: (not tested) 
-	 * last tested:       (not tested)
-	 */
-		_Pragma("GCC diagnostic push");
-		_Pragma("GCC diagnostic ignored \"-Wanalyzer-malloc-leak\"");
 		if (!hrd_hashmap_resize(map, map->total_slots * 2)) {
-			_Pragma("GCC diagnostic pop");
 			free(slot.key);
 			return false;
 		}
 	}
 	unsigned int index = get_index(map, &slot);
+	if (map->slots[index].key) {
+		free(map->slots[index].key);
+	}
 	hrd_hashmap_slot* last = map->last;
 	map->slots[index] = slot;
 	if (last)
@@ -154,14 +151,21 @@ void hrd_hashmap_remove_value(hrd_hashmap* map, char* key)
 	hrd_hashmap_slot slot;
 	slot.key = key;
 	unsigned int index = get_index(map, &slot);
-	map->slots[index].prev->next = map->slots[index].next;
-	map->slots[index].next->prev = map->slots[index].prev;
-	free(map->slots[index].key);
-	map->slots[index].key = NULL;
-	map->slots[index].value = NULL;
-	map->slots[index].next = NULL;
-	map->slots[index].prev = NULL;
-	map->slots[index].hash = 0;
+	hrd_hashmap_slot* sp = map->slots + index;
+	hrd_hashmap_slot* next = sp->next;
+	hrd_hashmap_slot* prev = sp->prev;
+
+	if (next)
+		next->prev = prev;
+	if (prev)
+		prev->next = next;
+
+	free(sp->key);
+
+	sp->key = NULL;
+	sp->value = NULL;
+
+	map->occupied_slots--;
 }
 
 void hrd_hashmap_free(hrd_hashmap* map)

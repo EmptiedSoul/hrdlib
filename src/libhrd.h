@@ -59,18 +59,20 @@ enum {
 	HRDFS_EXECBL = 16, /* is executable			*/
 };
 
-extern bool hrd_file_exists(char* filename,
-			    int flags); /* is file exists 			*/
+extern bool
+hrd_file_exists(char* filename,
+		int flags); /* is file exists 			*/
 /* cache */
 extern int
 hrd_cache_set_dir(char* filename); /* Set cache file directory 		*/
-extern int hrd_cache_data(char* filename, void* data,
-			  size_t size); /* Serialize data			*/
-extern size_t hrd_uncache_get_size(
-	char* filename); /* Get size of cached data		*/
-extern int hrd_uncache_get_data(
-	char* filename, void* dest,
-	size_t size); /* Uncache data				*/
+extern int
+hrd_cache_data(char* filename, void* data,
+	       size_t size); /* Serialize data			*/
+extern size_t
+hrd_uncache_get_size(char* filename); /* Get size of cached data		*/
+extern int
+hrd_uncache_get_data(char* filename, void* dest,
+		     size_t size); /* Uncache data				*/
 extern void*
 hrd_cache_edit_data(char* filename,
 		    size_t size); /* Edit cached data			*/
@@ -80,8 +82,9 @@ hrd_cache_edit_end(void* addr,
 
 /* config */
 extern char* hrd_cfg_get_string_at(char* filename, char* section, char* key);
-extern char* hrd_cfg_get_string(hrd_config* cfg, char* section,
-				char* key); /* Get value for key in cfg file	*/
+extern char*
+hrd_cfg_get_string(hrd_config* cfg, char* section,
+		   char* key); /* Get value for key in cfg file	*/
 extern void hrd_cfg_set_string(hrd_config* cfg, char* section, char* key,
 			       char* value);
 
@@ -113,12 +116,13 @@ void hrd_hashmap_autofree(hrd_hashmap** map);
 
 /* strings */
 extern size_t hrd_string_discard_chars(
-	char* string, char to_discard); /* discard chars from string		*/
+	char* string,
+	char to_discard); /* discard chars from string		*/
 extern char** __attribute__((malloc)) hrd_string_split(
 	char* string,
 	char* delimiters); /* split string				*/
-extern void hrd_string_array_free(
-	char** array); /* free string array (splitted string)	*/
+extern void
+hrd_string_array_free(char** array); /* free string array (splitted string)	*/
 extern void hrd_string_array_push(char*** array, char* string);
 extern void hrd_string_array_autofree(char*** array);
 extern char* hrd_sprintf(char* fmt, ...);

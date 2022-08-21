@@ -1,4 +1,5 @@
-CC = gcc
+CC ?= gcc
+export CC
 DESTDIR=
 ADDFLAGS =
 CFLAGS = -Ofast -pipe -fomit-frame-pointer -flto=jobserver -fuse-linker-plugin -fuse-ld=gold -fPIC -floop-block -floop-interchange -ftree-loop-distribution -floop-strip-mine #-fanalyzer #-fanalyzer-verbosity=3
